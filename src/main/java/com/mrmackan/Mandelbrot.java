@@ -1,30 +1,26 @@
 package com.mrmackan;
 
 import javax.imageio.ImageIO;
-import java.awt.*;
+import java.awt.Color;
 import java.awt.image.BufferedImage;
-import java.io.Console;
 import java.io.File;
 import java.io.IOException;
-import java.util.Random;
 
 /**
  * Mandelbrot set in  Java!
  */
 public class Mandelbrot
 {
-    private int width = 1024;
-    private int height = 1024;
+    private final int width = 8196;
+    private final int height = 8196;
 
-    private int maxIterations = 100;
-    private double radius = 2;
-    private double scale = 2;
+    private final int maxIterations = 1000;
+    private final double radius = 2;
+    private final double scale = 2;
 
     public Mandelbrot()
     {
-
         int[][] mandelbrot = new int[height][width];
-        Random rnd = new Random();
 
         // Constructs a BufferedImage of one of the predefined image types.
         BufferedImage bufferedImage = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
@@ -46,9 +42,20 @@ public class Mandelbrot
             for (int x = 0; x < width; x++)
             {
                 int count = mandelbrot[y][x];
-                if (count < 100)
+
+                if (count < maxIterations)
                 {
-                    bufferedImage.setRGB(x, y, 0xffffff);
+                    //float hue= (float) map(count,0,maxIterations,0,50);
+                    //var color = Color.getHSBColor(hue, 1, 1);
+                    //bufferedImage.setRGB(x, y, color.getRGB());
+                    float n = ((float) count/maxIterations);
+                    float frequency = 3;
+                    int red = (int) ((Math.sin(40*frequency*n-Math.PI/2+1)*0.5+0.5)*255);
+                    int green = (int) ((Math.sin(10*frequency*n-Math.PI/2+1)*0.5+0.5)*255);
+                    int blue = (int) ((Math.sin(5*frequency*n-Math.PI/2+1)*0.5+0.5)*255);
+                    var color = new Color(red, green, blue);
+
+                    bufferedImage.setRGB(x, y, color.getRGB());
                 }
                 else
                 {
