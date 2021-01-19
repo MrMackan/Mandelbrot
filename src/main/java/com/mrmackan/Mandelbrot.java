@@ -11,12 +11,19 @@ import java.io.IOException;
  */
 public class Mandelbrot
 {
+    //picture size
     private final int width = 8196;
     private final int height = 8196;
 
     private final int maxIterations = 1000;
+
     private final double radius = 2;
     private final double scale = 2;
+
+    //quick color access
+    private final double rgbRed = 40;
+    private final double rgbGreen = 10;
+    private final double rgbBlue = 5;
 
     public Mandelbrot()
     {
@@ -50,9 +57,9 @@ public class Mandelbrot
                     //bufferedImage.setRGB(x, y, color.getRGB());
                     float n = ((float) count / maxIterations);
                     float frequency = 3;
-                    int red = (int) ((Math.sin(40 * frequency * n - Math.PI / 2 + 1) * 0.5 + 0.5) * 255);
-                    int green = (int) ((Math.sin(10 * frequency * n - Math.PI / 2 + 1) * 0.5 + 0.5) * 255);
-                    int blue = (int) ((Math.sin(5 * frequency * n - Math.PI / 2 + 1) * 0.5 + 0.5) * 255);
+                    int red = (int) ((Math.sin(rgbRed * frequency * n - Math.PI / 2 + 1) * 0.5 + 0.5) * 255);
+                    int green = (int) ((Math.sin(rgbGreen * frequency * n - Math.PI / 2 + 1) * 0.5 + 0.5) * 255);
+                    int blue = (int) ((Math.sin(rgbBlue * frequency * n - Math.PI / 2 + 1) * 0.5 + 0.5) * 255);
                     var color = new Color(red, green, blue);
 
                     bufferedImage.setRGB(x, y, color.getRGB());
