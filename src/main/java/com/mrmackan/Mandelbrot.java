@@ -48,55 +48,53 @@ public class Mandelbrot
                     //float hue= (float) map(count,0,maxIterations,0,50);
                     //var color = Color.getHSBColor(hue, 1, 1);
                     //bufferedImage.setRGB(x, y, color.getRGB());
-                    float n = ((float) count/maxIterations);
+                    float n = ((float) count / maxIterations);
                     float frequency = 3;
-                    int red = (int) ((Math.sin(40*frequency*n-Math.PI/2+1)*0.5+0.5)*255);
-                    int green = (int) ((Math.sin(10*frequency*n-Math.PI/2+1)*0.5+0.5)*255);
-                    int blue = (int) ((Math.sin(5*frequency*n-Math.PI/2+1)*0.5+0.5)*255);
+                    int red = (int) ((Math.sin(40 * frequency * n - Math.PI / 2 + 1) * 0.5 + 0.5) * 255);
+                    int green = (int) ((Math.sin(10 * frequency * n - Math.PI / 2 + 1) * 0.5 + 0.5) * 255);
+                    int blue = (int) ((Math.sin(5 * frequency * n - Math.PI / 2 + 1) * 0.5 + 0.5) * 255);
                     var color = new Color(red, green, blue);
 
                     bufferedImage.setRGB(x, y, color.getRGB());
                 }
-                else
-                {
-                    bufferedImage.setRGB(x, y, 0);
-                }
+                else { bufferedImage.setRGB(x, y, 0); }
             }
         }
 
         // Saves mandelbrot as PNG
         File file = new File("mandelbrot.png");
-
         try
         {
             System.out.println("saving");
             ImageIO.write(bufferedImage, "png", file);
         }
-        catch (IOException exception)
-        {
-            System.out.println("Failed to save");
-        }
+        catch (IOException exception) { System.out.println("Failed to save"); }
     }
 
+    /**
+     * math method for iterations
+     * @param x-coordinate
+     * @param y-coordinate
+     * @return amount of iterations
+     */
     public int iteration(double x, double y)
     {
         double z_Real = 0;
         double z_Imaginary = 0;
-        double z_TempReal = z_Real;
+        double z_TempReal;
 
-        double c_Real = x*scale;
-        double c_Imaginary = y*scale;
+        double c_Real = x * scale;
+        double c_Imaginary = y * scale;
 
         int iterations;
 
-
         for (iterations = 0; iterations < maxIterations; iterations++)
         {
-            z_TempReal = (z_Real*z_Real)-(z_Imaginary*z_Imaginary)+c_Real;
-            z_Imaginary = (2*z_Real*z_Imaginary)+c_Imaginary;
+            z_TempReal = (z_Real * z_Real) - (z_Imaginary * z_Imaginary) + c_Real;
+            z_Imaginary = (2 * z_Real * z_Imaginary) + c_Imaginary;
             z_Real = z_TempReal;
 
-            if (Math.sqrt((z_Real*z_Real)+(z_Imaginary*z_Imaginary)) > radius)
+            if (Math.sqrt((z_Real * z_Real) + (z_Imaginary * z_Imaginary)) > radius)
             {
                 break;
             }
@@ -106,13 +104,10 @@ public class Mandelbrot
 
     public static double map(double input, double minIn, double maxIn, double minOut, double maxOut)
     {
-        double output = (input-minIn)/(maxIn-minIn)*(maxOut-minOut)+minOut;
+        double output = (input - minIn) / (maxIn - minIn) * (maxOut - minOut) + minOut;
 
         return output;
     }
 
-    public static void main(String[] args)
-    {
-        new Mandelbrot();
-    }
+    public static void main(String[] args) { new Mandelbrot(); }
 }
