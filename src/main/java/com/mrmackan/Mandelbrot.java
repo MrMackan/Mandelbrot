@@ -9,7 +9,7 @@ import java.io.IOException;
 /**
  * Mandelbrot set in  Java!
  */
-public class Mandelbrot
+public class Mandelbrot extends Thread
 {
     //picture size
     private final int WIDTH = 1024;
@@ -29,11 +29,7 @@ public class Mandelbrot
     private final double rgbGreen = 10;
     private final double rgbBlue = 5;
 
-    int mandelbrot[][];
-
-    BufferedImage bufferedImage;
-
-    class Worker implements Runnable
+    public Mandelbrot(int i)
     {
         int width = 0;
         int height = 0;
@@ -188,5 +184,26 @@ public class Mandelbrot
         return output;
     }
 
-    public static void main(String[] args) { new Mandelbrot(); }
+    public static void main(String[] args) throws Exception
+    {
+        //calculate setup time
+        long startTime = System.currentTimeMillis();
+        int maxThreads = 24;
+        int amountThreads;
+        int started = 0;
+        for (amountThreads = 0; amountThreads < maxThreads; amountThreads++)
+        {
+            Mandelbrot mandelbrot = new Mandelbrot(amountThreads);
+
+            started++;
+
+            /*for (int i = 0; i <= started; i++)
+            {
+                mandelbrot.start();
+                mandelbrot.join();
+            }*/
+        }
+        long endTime = System.currentTimeMillis();
+        System.out.println("Completion time was: " + ((double) (endTime - startTime) / 1000) + "s");
+    }
 }
