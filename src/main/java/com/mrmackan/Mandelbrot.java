@@ -12,13 +12,17 @@ import java.io.IOException;
 public class Mandelbrot
 {
     //picture size
-    private final int width = 8196;
-    private final int height = 8196;
+    private final int width = 1024;
+    private final int height = 1024;
 
     private final int maxIterations = 1000;
 
     private final double radius = 2;
     private final double scale = 2;
+
+    //quick position changing
+    private final double posX = 0;
+    private final double posY = 0;
 
     //quick color access
     private final double rgbRed = 40;
@@ -28,6 +32,9 @@ public class Mandelbrot
     public Mandelbrot()
     {
         int[][] mandelbrot = new int[height][width];
+        int k = (height * width) / 10;
+        int index;
+        double progress;
 
         // Constructs a BufferedImage of one of the predefined image types.
         BufferedImage bufferedImage = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
@@ -39,7 +46,12 @@ public class Mandelbrot
             for (int x = 0; x < width; x++)
             {
                 var mapX_value = map(x, 0, width, -1, 1);
-                mandelbrot[y][x] = iteration(mapX_value, mapY_value);
+                mandelbrot[y][x] = iteration(mapX_value + posX, mapY_value + posY);
+
+                progress = ((double) (y * width + x) / (height * width));
+                index = (y * width + x);
+                if (index % k == 0)
+                { System.out.printf("Generating mandelbrot: %.0f%% \n", progress * 100); }
             }
         }
 
@@ -52,9 +64,6 @@ public class Mandelbrot
 
                 if (count < maxIterations)
                 {
-                    //float hue= (float) map(count,0,maxIterations,0,50);
-                    //var color = Color.getHSBColor(hue, 1, 1);
-                    //bufferedImage.setRGB(x, y, color.getRGB());
                     float n = ((float) count / maxIterations);
                     float frequency = 3;
                     int red = (int) ((Math.sin(rgbRed * frequency * n - Math.PI / 2 + 1) * 0.5 + 0.5) * 255);
@@ -65,6 +74,11 @@ public class Mandelbrot
                     bufferedImage.setRGB(x, y, color.getRGB());
                 }
                 else { bufferedImage.setRGB(x, y, 0); }
+
+                progress = ((double) (y * width + x) / (height * width));
+                index = (y * width + x);
+                if (index % k == 0)
+                { System.out.printf("Fixing colors: %.0f%% \n", progress * 100); }
             }
         }
 
@@ -72,7 +86,7 @@ public class Mandelbrot
         File file = new File("mandelbrot.png");
         try
         {
-            System.out.println("saving");
+            System.out.println("Saving picture");
             ImageIO.write(bufferedImage, "png", file);
         }
         catch (IOException exception) { System.out.println("Failed to save"); }
