@@ -1,9 +1,3 @@
-/*
-  Author: Marcus Linné
-  Id: ai8851
-  Study program: DT
-*/
-
 package com.mrmackan;
 
 public class MultithreadingTest extends Thread
@@ -59,8 +53,7 @@ public class MultithreadingTest extends Thread
 
 class TestThread
 {
-
-    public static void main(String args[])
+    public static void main(String[] args)
     {
         MultithreadingTest T1 = new MultithreadingTest("Thread-1");
         T1.start();
