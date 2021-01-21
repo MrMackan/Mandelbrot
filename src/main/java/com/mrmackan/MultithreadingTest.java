@@ -4,7 +4,7 @@ public class MultithreadingTest extends Thread
 {
     private Thread t;
     private String threadName;
-
+//sgsgsg
     /**
      * creates a thread
      * @param name of thread
