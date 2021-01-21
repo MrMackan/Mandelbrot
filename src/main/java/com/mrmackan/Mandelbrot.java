@@ -136,18 +136,18 @@ public class Mandelbrot extends Thread
         long startTime = System.currentTimeMillis();
         int maxThreads = 24;
         int amountThreads;
-        int started=0;
+        int started = 0;
         for (amountThreads = 0; amountThreads < maxThreads; amountThreads++)
         {
             Mandelbrot mandelbrot = new Mandelbrot(amountThreads);
 
             started++;
 
-            for (int i = 0; i <= started; i++)
+            /*for (int i = 0; i <= started; i++)
             {
                 mandelbrot.start();
                 mandelbrot.join();
-            }
+            }*/
         }
         long endTime = System.currentTimeMillis();
         System.out.println("Completion time was: " + ((double) (endTime - startTime) / 1000) + "s");
