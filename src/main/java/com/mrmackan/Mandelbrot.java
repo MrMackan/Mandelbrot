@@ -12,10 +12,10 @@ import java.io.IOException;
 public class Mandelbrot
 {
     //picture size
-    private final int WIDTH = 10240;
-    private final int HEIGHT = 10240;
+    private final int WIDTH = 1024;
+    private final int HEIGHT = 1024;
 
-    private final int MAX_ITERATIONS = 5120;
+    private final int MAX_ITERATIONS = 512;
 
     private final double RADIUS = 2;
     private final double SCALE = 2;
@@ -33,94 +33,6 @@ public class Mandelbrot
 
     BufferedImage bufferedImage;
 
-    class Worker implements Runnable
-    {
-        int width;
-        int height;
-        int rows;
-        int cols;
-
-        int startRow, endRow;
-        int startCol, endCol;
-
-        int[][] data;
-
-        int iterations = 512;
-        double scale = 1.0;
-        double posX = 0, posY = 0;
-
-        /**
-         * the worker handles
-         * @param startRow
-         * @param endRow
-         * @param startCol
-         * @param endCol
-         * @param width
-         * @param height
-         */
-        Worker(int startRow, int endRow, int startCol, int endCol, int width, int height)
-        {
-            this.startRow = startRow;
-            this.endRow = endRow;
-            this.startCol = startCol;
-            this.endCol = endCol;
-            this.width = width;
-            this.height = height;
-
-            rows = endRow - startRow;
-            cols = endCol - startCol;
-
-            data = new int[rows][cols];
-        }
-
-        @Override
-        public void run()
-        {
-            compute();
-
-            System.out.printf("Thread: %d DONE!\n", Thread.currentThread().getId());
-        }
-
-        private void compute()
-        {
-            for (int y = 0; y < rows; y++)
-            {
-                var mapY_value = map(y + startRow, 0, height, -1, 1);
-
-                for (int x = 0; x < cols; x++)
-                {
-                    var mapX_value = map(x + startCol, 0, width, -1, 1);
-                    data[y][x] = fractals(mapX_value + posX, mapY_value + posY, scale, iterations);
-                }
-            }
-        }
-
-        private int fractals(double x, double y, double scale, int maxIterations)
-        {
-            double z_Real = 0;
-            double z_Imaginary = 0;
-            double z_TempReal;
-
-            double c_Real = x * scale;
-            double c_Imaginary = y * scale;
-
-            int iterations;
-
-            for (iterations = 0; iterations < maxIterations; iterations++)
-            {
-                z_TempReal = (z_Real * z_Real) - (z_Imaginary * z_Imaginary) + c_Real;
-                z_Imaginary = (2 * z_Real * z_Imaginary) + c_Imaginary;
-                z_Real = z_TempReal;
-
-                if (Math.sqrt((z_Real * z_Real) + (z_Imaginary * z_Imaginary)) > RADIUS)
-                {
-                    break;
-                }
-            }
-            return iterations;
-        }
-    }
-
     // Each worker handles a part of the image and then split on same amount of threads
     public Mandelbrot()
     {
@@ -128,10 +40,19 @@ public class Mandelbrot
 
         bufferedImage = new BufferedImage(WIDTH, HEIGHT, BufferedImage.TYPE_INT_RGB);
 
-        Worker worker = new Worker(0, HEIGHT, 0, WIDTH / 2, WIDTH, HEIGHT);
+        FractalWorker worker = new FractalWorker(0, HEIGHT, 0, WIDTH / 2, WIDTH, HEIGHT);
+        worker.setIterations(MAX_ITERATIONS);
+        worker.setRadius(RADIUS);
+        worker.setScale(SCALE);
+        worker.setPosition(POS_X, POS_Y);
 
-        Worker worker2 = new Worker(0, HEIGHT, WIDTH / 2, WIDTH, WIDTH, HEIGHT);
+        FractalWorker worker2 = new FractalWorker(0, HEIGHT, WIDTH / 2, WIDTH, WIDTH, HEIGHT);
+        worker2.setIterations(MAX_ITERATIONS);
+        worker2.setRadius(RADIUS);
+        worker2.setScale(SCALE);
+        worker2.setPosition(POS_X, POS_Y);
 
+        // creates the threads
         Thread thread1 = new Thread(worker);
         Thread thread2 = new Thread(worker2);
 
