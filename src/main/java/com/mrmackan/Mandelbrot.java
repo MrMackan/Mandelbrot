@@ -49,6 +49,15 @@ public class Mandelbrot
         double scale = 1.0;
         double posX = 0, posY = 0;
 
+        /**
+         * the worker handles
+         * @param startRow
+         * @param endRow
+         * @param startCol
+         * @param endCol
+         * @param width
+         * @param height
+         */
         Worker(int startRow, int endRow, int startCol, int endCol, int width, int height)
         {
             this.startRow = startRow;
@@ -108,14 +117,11 @@ public class Mandelbrot
                     break;
                 }
             }
-
             return iterations;
         }
     }
 
-    /**
-     * each worker handles a part of the image and then split on same amount of threads
-     */
+    // Each worker handles a part of the image and then split on same amount of threads
     public Mandelbrot()
     {
         mandelbrot = new int[WIDTH][HEIGHT];
@@ -145,9 +151,7 @@ public class Mandelbrot
             e.printStackTrace();
         }
 
-
         // Joins the computed image part from each thread into one, y-axis is same on both threads but not x-axis
-
         for (int y = 0; y < HEIGHT; y++)
         {
             for (int x = 0; x < WIDTH; x++)
