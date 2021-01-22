@@ -90,7 +90,7 @@ public class Mandelbrot
 
         // TODO: Join the data when using multiple threads, so far only 2 thread, next job is 4 threads
         long endTime = System.currentTimeMillis();
-        System.out.println("Completion time was: " + ((double) (endTime - startTime) / 1000) + "s");
+        System.out.println("Computation completion time was: " + ((double) (endTime - startTime) / 1000) + "s");
 
         generateImage();
         save();
