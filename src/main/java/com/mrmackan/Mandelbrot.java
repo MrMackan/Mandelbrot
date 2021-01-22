@@ -9,13 +9,13 @@ import java.io.IOException;
 /**
  * Mandelbrot set in  Java!
  */
-public class Mandelbrot extends Thread
+public class Mandelbrot
 {
     //picture size
-    private final int WIDTH = 1024;
-    private final int HEIGHT = 1024;
+    private final int WIDTH = 10240;
+    private final int HEIGHT = 10240;
 
-    private final int MAX_ITERATIONS = 512;
+    private final int MAX_ITERATIONS = 5120;
 
     private final double RADIUS = 2;
     private final double SCALE = 2;
@@ -29,17 +29,21 @@ public class Mandelbrot extends Thread
     private final double rgbGreen = 10;
     private final double rgbBlue = 5;
 
-    public Mandelbrot(int i)
+    int[][] mandelbrot;
+
+    BufferedImage bufferedImage;
+
+    class Worker implements Runnable
     {
-        int width = 0;
-        int height = 0;
+        int width;
+        int height;
         int rows;
         int cols;
 
         int startRow, endRow;
         int startCol, endCol;
 
-        int data[][];
+        int[][] data;
 
         int iterations = 512;
         double scale = 1.0;
@@ -55,7 +59,7 @@ public class Mandelbrot extends Thread
             this.height = height;
 
             rows = endRow - startRow;
-            cols = endCol -startCol;
+            cols = endCol - startCol;
 
             data = new int[rows][cols];
         }
@@ -64,18 +68,19 @@ public class Mandelbrot extends Thread
         public void run()
         {
             compute();
+
             System.out.printf("Thread: %d DONE!\n", Thread.currentThread().getId());
         }
 
         private void compute()
         {
-            for (int y = 0; y < height; y++)
+            for (int y = 0; y < rows; y++)
             {
-                var mapY_value = map(y, 0, height, -1, 1);
+                var mapY_value = map(y + startRow, 0, height, -1, 1);
 
-                for (int x = 0; x < width; x++)
+                for (int x = 0; x < cols; x++)
                 {
-                    var mapX_value = map(x, 0, width, -1, 1);
+                    var mapX_value = map(x + startCol, 0, width, -1, 1);
                     data[y][x] = fractals(mapX_value + posX, mapY_value + posY, scale, iterations);
                 }
             }
@@ -108,24 +113,59 @@ public class Mandelbrot extends Thread
         }
     }
 
+    /**
+     * each worker handles a part of the image and then split on same amount of threads
+     */
     public Mandelbrot()
     {
         mandelbrot = new int[WIDTH][HEIGHT];
 
         bufferedImage = new BufferedImage(WIDTH, HEIGHT, BufferedImage.TYPE_INT_RGB);
 
-        Worker w = new Worker(0, HEIGHT, 0, WIDTH, WIDTH, HEIGHT);
-        Thread t = new Thread(w);
-        t.start();
+        Worker worker = new Worker(0, HEIGHT, 0, WIDTH / 2, WIDTH, HEIGHT);
 
-        try {
-            t.join();
-        } catch (InterruptedException e) {
+        Worker worker2 = new Worker(0, HEIGHT, WIDTH / 2, WIDTH, WIDTH, HEIGHT);
+
+        Thread thread1 = new Thread(worker);
+        Thread thread2 = new Thread(worker2);
+
+        //calculate setup time
+        long startTime = System.currentTimeMillis();
+
+        //launches the threads, the join is to sync them with the main thread to avoid exit
+        thread1.start();
+        thread2.start();
+        try
+        {
+            thread1.join();
+            thread2.join();
+        }
+        catch (InterruptedException e)
+        {
             e.printStackTrace();
         }
 
-        // TODO: Join the data when using multiple threads
-        mandelbrot = w.data;
+
+        // Joins the computed image part from each thread into one, y-axis is same on both threads but not x-axis
+
+        for (int y = 0; y < HEIGHT; y++)
+        {
+            for (int x = 0; x < WIDTH; x++)
+            {
+                if (x < WIDTH / 2)
+                {
+                    mandelbrot[y][x] = worker.data[y][x];
+                }
+                else
+                {
+                    mandelbrot[y][x] = worker2.data[y][x - WIDTH / 2];
+                }
+            }
+        }
+
+        // TODO: Join the data when using multiple threads, so far only 2 thread, next job is 4 threads
+        long endTime = System.currentTimeMillis();
+        System.out.println("Completion time was: " + ((double) (endTime - startTime) / 1000) + "s");
 
         generateImage();
         save();
@@ -179,31 +219,8 @@ public class Mandelbrot extends Thread
 
     public static double map(double input, double minIn, double maxIn, double minOut, double maxOut)
     {
-        double output = (input - minIn) / (maxIn - minIn) * (maxOut - minOut) + minOut;
-
-        return output;
+        return (input - minIn) / (maxIn - minIn) * (maxOut - minOut) + minOut;
     }
 
-    public static void main(String[] args) throws Exception
-    {
-        //calculate setup time
-        long startTime = System.currentTimeMillis();
-        int maxThreads = 24;
-        int amountThreads;
-        int started = 0;
-        for (amountThreads = 0; amountThreads < maxThreads; amountThreads++)
-        {
-            Mandelbrot mandelbrot = new Mandelbrot(amountThreads);
-
-            started++;
-
-            /*for (int i = 0; i <= started; i++)
-            {
-                mandelbrot.start();
-                mandelbrot.join();
-            }*/
-        }
-        long endTime = System.currentTimeMillis();
-        System.out.println("Completion time was: " + ((double) (endTime - startTime) / 1000) + "s");
-    }
+    public static void main(String[] args) { new Mandelbrot(); }
 }
