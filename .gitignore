@@ -6,16 +6,15 @@ out
 .classpath
 .project
 *.class
-.classpath
 
 # workspace
 .settings
 .vscode
 .idea
-.project
-.iml
+*.iml
 
 # misc
 *.vpp.bak*
 *.vpp.lck
 *.zip
+*.png
