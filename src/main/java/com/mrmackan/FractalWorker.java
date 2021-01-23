@@ -1,9 +1,3 @@
-/*
-  Author: Marcus Linné
-  Id: ai8851
-  Study program: DT
-*/
-
 package com.mrmackan;
 
 public class FractalWorker implements Runnable
