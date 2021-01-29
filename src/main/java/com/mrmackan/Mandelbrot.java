@@ -11,10 +11,28 @@ import java.io.IOException;
  */
 public class Mandelbrot
 {
+    //@formatter:off
+    static
+    {
+        System.out.print("\n" +
+                "-----------------------------------------------------\n" +
+                "|                                                   |\n" +
+                "|         Welcome to Marcus mandelbrot set          |\n" +
+                "|                                                   |\n" +
+                "-----------------------------------------------------\n\n");
+    }
+    //@formatter:on
+
+    /*
+     * Checks how many threads your cpu has and utilizes them all at once for the program.
+     * Out commented version is if you want to choose yourself with default being 4 threads.
+     */
+    private final int threadCount = Runtime.getRuntime().availableProcessors();
+    //private final int threadCount = 4;
+
     // Picture size in pixels and how many iterations should be done
     private final int WIDTH = 10800;
     private final int HEIGHT = 10800;
-
     private final int MAX_ITERATIONS = 2048;
 
     private final double RADIUS = 2;
@@ -24,15 +42,13 @@ public class Mandelbrot
     private final double POS_X = 0;
     private final double POS_Y = 0;
 
-    // Quick color access
+    // Quick color changing and its color frequency
     private final float FREQUENCY = 20;
-
     private final double rgbRed = 40;
     private final double rgbGreen = 10;
     private final double rgbBlue = 5;
 
     int[][] mandelbrot;
-
     BufferedImage bufferedImage;
 
     // Each worker handles a part of the image and then split on same amount of threads
@@ -42,10 +58,9 @@ public class Mandelbrot
 
         bufferedImage = new BufferedImage(WIDTH, HEIGHT, BufferedImage.TYPE_INT_RGB);
 
-        int threadCount = 24;
         int k = WIDTH / threadCount;
 
-        // Creates the threads asked for
+        // Creates the threads and their respective workers
         Thread[] threads = new Thread[threadCount];
 
         for (int i = 0; i < threads.length; i++)
@@ -61,7 +76,7 @@ public class Mandelbrot
         // Calculate setup time
         long startTime = System.currentTimeMillis();
 
-        /**
+        /*
          * Launches the threads, the join is to sync the worker threads with the head application thread to avoid
          * a wrongful termination of threads without them being async
          */
@@ -72,14 +87,9 @@ public class Mandelbrot
 
         for (Thread t : threads)
         {
-            try
-            {
-                t.join();
-            }
-            catch (InterruptedException e)
-            {
-                e.printStackTrace();
-            }
+            try { t.join(); }
+
+            catch (InterruptedException e) { e.printStackTrace(); }
         }
 
         long endTime = System.currentTimeMillis();
@@ -88,6 +98,13 @@ public class Mandelbrot
         generateImage();
         save();
     }
+
+    public static double map(double input, double minIn, double maxIn, double minOut, double maxOut)
+    {
+        return (input - minIn) / (maxIn - minIn) * (maxOut - minOut) + minOut;
+    }
+
+    public static void main(String[] args) { new Mandelbrot(); }
 
     private void generateImage()
     {
@@ -117,8 +134,8 @@ public class Mandelbrot
 
                 progress = ((double) (y * WIDTH + x) / (HEIGHT * WIDTH));
                 index = (y * WIDTH + x);
-                if (index % k == 0)
-                { System.out.printf("Fixing colors: %.0f%% \n", progress * 100); }
+
+                if (index % k == 0) { System.out.printf("Fixing colors: %.0f%% \n", progress * 100); }
             }
         }
     }
@@ -133,11 +150,6 @@ public class Mandelbrot
             ImageIO.write(bufferedImage, "png", file);
         }
         catch (IOException exception) { System.out.println("Failed to save"); }
-    }
-
-    public static double map(double input, double minIn, double maxIn, double minOut, double maxOut)
-    {
-        return (input - minIn) / (maxIn - minIn) * (maxOut - minOut) + minOut;
     }
 
     class FractalWorker implements Runnable
@@ -198,28 +210,16 @@ public class Mandelbrot
                 z_Imaginary = (2 * z_Real * z_Imaginary) + c_Imaginary;
                 z_Real = z_TempReal;
 
-                if (Math.sqrt((z_Real * z_Real) + (z_Imaginary * z_Imaginary)) > radius)
-                {
-                    break;
-                }
+                if (Math.sqrt((z_Real * z_Real) + (z_Imaginary * z_Imaginary)) > radius) { break; }
             }
             return iterations;
         }
 
-        public void setIterations(int iterations)
-        {
-            this.iterations = iterations;
-        }
+        public void setIterations(int iterations) { this.iterations = iterations; }
 
-        public void setRadius(double radius)
-        {
-            this.radius = radius;
-        }
+        public void setRadius(double radius) { this.radius = radius; }
 
-        public void setScale(double scale)
-        {
-            this.scale = scale;
-        }
+        public void setScale(double scale) { this.scale = scale; }
 
         public void setPosition(double posX, double posY)
         {
@@ -227,6 +227,4 @@ public class Mandelbrot
             this.posY = posY;
         }
     }
-
-    public static void main(String[] args) { new Mandelbrot(); }
 }
