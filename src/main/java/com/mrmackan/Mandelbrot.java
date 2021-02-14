@@ -30,10 +30,12 @@ public class Mandelbrot
     private final int threadCount = Runtime.getRuntime().availableProcessors();
     //private final int threadCount = 4;
 
-    // Picture size in pixels and how many iterations should be done
+    /**
+     * Picture size in pixels and how many iterations should be done, iterations have an effect on the colors as well
+     */
     private final int WIDTH = 10800;
     private final int HEIGHT = 10800;
-    private final int MAX_ITERATIONS = 2048;
+    private final int MAX_ITERATIONS = 9999;
 
     private final double RADIUS = 2;
     private final double SCALE = 2;
@@ -60,31 +62,39 @@ public class Mandelbrot
 
         int k = WIDTH / threadCount;
 
-        // Creates the threads and their respective workers
+        /**
+         * Creates the threads, and the loop creates and assigns each worker with
+         * certain values for each worker based on the amount of workers created.
+         * This is so that it can run async aka synchronized multithreading their respective workers
+         */
         Thread[] threads = new Thread[threadCount];
 
-        for (int i = 0; i < threads.length; i++)
+        for (int index = 0; index < threads.length; index++)
         {
-            FractalWorker worker = new FractalWorker(0, HEIGHT, k * i, k * (i + 1));
+            FractalWorker worker = new FractalWorker(0, HEIGHT, k * index, k * (index + 1), index);
             worker.setIterations(MAX_ITERATIONS);
             worker.setRadius(RADIUS);
             worker.setScale(SCALE);
             worker.setPosition(POS_X, POS_Y);
-            threads[i] = new Thread(worker);
+            threads[index] = new Thread(worker);
         }
 
-        // Calculate setup time
+        // Calculates the setup time
         long startTime = System.currentTimeMillis();
 
         /*
-         * Launches the threads, the join is to sync the worker threads with the head application thread to avoid
-         * a wrongful termination of threads without them being async
+         * Launches the threads basically
          */
         for (Thread t : threads)
         {
             t.start();
         }
 
+        /**
+         * The join is to sync the worker threads with the head application thread,
+         * this is to avoid a wrongful termination of any of the threads while they are not async,
+         * this is unless they've been synchronized so their cin this case computation has been "stored"
+         */
         for (Thread t : threads)
         {
             try { t.join(); }
@@ -93,7 +103,8 @@ public class Mandelbrot
         }
 
         long endTime = System.currentTimeMillis();
-        System.out.println("Computation completion time was: " + ((double) (endTime - startTime) / 1000) + "s");
+        System.out.println("\n---------------------------------------------\n");
+        System.out.println("Computation completion time was: " + ((double) (endTime - startTime) / 1000) + "s\n");
 
         generateImage();
         save();
@@ -103,8 +114,6 @@ public class Mandelbrot
     {
         return (input - minIn) / (maxIn - minIn) * (maxOut - minOut) + minOut;
     }
-
-    public static void main(String[] args) { new Mandelbrot(); }
 
     private void generateImage()
     {
@@ -146,16 +155,18 @@ public class Mandelbrot
         File file = new File("mandelbrot.png");
         try
         {
-            System.out.println("Saving picture");
+            System.out.println("Colors fixed: 100% now saving picture");
             ImageIO.write(bufferedImage, "png", file);
+            System.out.println("\nThe image has been saved");
         }
         catch (IOException exception) { System.out.println("Failed to save"); }
     }
 
-    class FractalWorker implements Runnable
+    private class FractalWorker implements Runnable
     {
-        int startRow, endRow;
-        int startCol, endCol;
+        private int startRow, endRow;
+        private int startCol, endCol;
+        private int id;
 
         private int iterations;
         private double radius;
@@ -163,12 +174,13 @@ public class Mandelbrot
         private double posX;
         private double posY;
 
-        FractalWorker(int startRow, int endRow, int startCol, int endCol)
+        FractalWorker(int startRow, int endRow, int startCol, int endCol, int id)
         {
             this.startRow = startRow;
             this.endRow = endRow;
             this.startCol = startCol;
             this.endCol = endCol;
+            this.id = id;
         }
 
         @Override
@@ -176,7 +188,7 @@ public class Mandelbrot
         {
             compute();
 
-            System.out.printf("Thread: %d DONE!\n", Thread.currentThread().getId());
+            System.out.printf("Thread: %d DONE!\n", id);
         }
 
         private void compute()
@@ -227,4 +239,6 @@ public class Mandelbrot
             this.posY = posY;
         }
     }
+
+    public static void main(String[] args) { new Mandelbrot(); }
 }
